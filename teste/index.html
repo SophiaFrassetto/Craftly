@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Terminal Logs</title>
+
+<style>
+body {
+    margin: 0;
+    background: #0d0d0d;
+    color: #00ff88;
+    font-family: Consolas, monospace;
+}
+
+#terminal {
+    padding: 15px;
+    height: 100vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+.line {
+    margin: 0;
+}
+
+.info { color: #00ff88; }
+.warn { color: #ffaa00; }
+.error { color: #ff4444; }
+</style>
+</head>
+<body>
+
+<div id="terminal"></div>
+
+<script>
+const terminal = document.getElementById("terminal");
+
+const ws = new WebSocket("ws://localhost:8001/ws/logs");
+
+ws.onmessage = (event) => {
+    const line = document.createElement("div");
+    line.classList.add("line");
+
+    const text = event.data;
+
+    // cor básica por tipo de log
+    if (text.includes("ERROR")) {
+        line.classList.add("error");
+    } else if (text.includes("WARN")) {
+        line.classList.add("warn");
+    } else {
+        line.classList.add("info");
+    }
+
+    line.textContent = text;
+    terminal.appendChild(line);
+
+    // scroll automático
+    terminal.scrollTop = terminal.scrollHeight;
+};
+
+ws.onclose = () => {
+    const line = document.createElement("div");
+    line.textContent = "[CONEXÃO FECHADA]";
+    line.style.color = "gray";
+    terminal.appendChild(line);
+};
+</script>
+
+</body>
+</html>
